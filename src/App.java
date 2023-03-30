@@ -1,52 +1,36 @@
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodyHandlers;
 import java.util.List;
-import java.util.Map;
 
 public class App {
     public static void main(String[] args) throws Exception {
         // fazer uma conexao HTTP e buscar os top 250 filmes imdb
 
         String url = "https://raw.githubusercontent.com/alura-cursos/imersao-java-2-api/main/TopMovies.json";
-        URI address = URI.create(url);
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder(address).GET().build();
-        HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-        String body = response.body();
+        ExtratorDeConteudos extrator = new ExtratorDeConteudoDoIMDB();
 
-        // pegar só os dados que interessam: titulo, poster e classificacao
-        JsonParser parser = new JsonParser();
-        List<Map<String, String>> listaDeFilmes = parser.parse(body);
+        // String url =
+        // "https://api.nasa.gov/planetary/apod?api_key=eWg4JHWqe2Ioe8Iu9M2ueuQGtjdptP5OExNlF8N9&start_date=2022-06-12&end_date=2022-06-14";
+        // ExtratorDeConteudoDaNasa extrator = new ExtratorDeConteudoDaNasa();
+
+        ClienteHttp http = new ClienteHttp();
+        String json = http.buscaDados(url);
 
         // exibir e manipular os dados
+        List<Conteudo> conteudos = extrator.extraiConteudos(json);
+
         GeradoraDeFigurinhas geradora = new GeradoraDeFigurinhas();
-        for (Map<String, String> filme : listaDeFilmes) {
-            String urlImage = filme.get("image");
-            String fullTitle = filme.get("fullTitle");
-            String filmName = fullTitle + ".png";
-            String archiveName = filmName.replace(":", "-");
-            String imdbRating = filme.get("imDbRating");
+        for (Conteudo conteudo : conteudos) {
 
-            InputStream inputStream = new URL(urlImage).openStream();
+            String nomeArquivo = conteudo.getTitle() + ".png";
+            InputStream inputStream = new URL(conteudo.getUrlImagem()).openStream();
 
-            geradora.cria(inputStream, archiveName,imdbRating);
+            geradora.cria(inputStream, nomeArquivo);
 
-            System.out.println("\u001b[0mTítulo: \033[1;90m\u001b[47m\t" + fullTitle + "\u001b[0m");
-            System.out.println("\u001b[0mPoster: \u001b[34m\u001b[4m\t" + urlImage + "\u001b[0m");
-            System.out.print("\u001b[0mClassificação:  \033[1;90m" + imdbRating + "\u001b[0m ");
+            System.out.println("\u001b[0mTítulo: \033[1;90m\u001b[47m\t" + conteudo.getTitle() + "\u001b[0m");
+            System.out.println("\u001b[0mPoster: \u001b[34m\u001b[4m\t" + conteudo.getUrlImagem() + "\u001b[0m");
+            System.out.println();
 
-            double doubleRating = Double.valueOf(imdbRating);
-            int intRating = (int) doubleRating;
-
-            for (int i = 0; i < intRating; i++) {
-                System.out.print("⭐");
-            }
-            System.out.println("\n");
         }
     }
 }

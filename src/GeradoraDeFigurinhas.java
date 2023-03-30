@@ -10,14 +10,13 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
 public class GeradoraDeFigurinhas {
 
-    public void cria(InputStream inputStream, String archiveName, String imdbRating) throws Exception {
+    public void cria(InputStream inputStream, String archiveName) throws Exception {
 
         // leitura da imagem
         // InputStream inputStream = new FileInputStream(new
@@ -38,24 +37,22 @@ public class GeradoraDeFigurinhas {
         Graphics2D graphics = (Graphics2D) newImage.getGraphics();
         graphics.drawImage(imageOriginal, 0, 0, null);
 
-        BufferedImage imageLike = ImageIO.read(new FileInputStream(new File("images/LIKE.png")));
-        graphics.drawImage(imageLike, width-400, height, null);
-
         // configurar a fonte
-        Font font = new Font("Comic Sans MS", Font.BOLD, 100);
+        Font font = new Font("Comic Sans MS", Font.BOLD, 120);
         graphics.setColor(Color.RED);
         graphics.setFont(font);
 
         // escrever uma frase na nova imagem
         FontMetrics fontMetrics = graphics.getFontMetrics();
-        Rectangle2D rectangle = fontMetrics.getStringBounds(imdbRating, graphics);
+        String text = "Topzera";
+        Rectangle2D rectangle = fontMetrics.getStringBounds(text, graphics);
         int textWidth = (int) rectangle.getWidth();
         int positionX = (width - textWidth) / 2;
         int positionY = newHeight - 200;
-        graphics.drawString(imdbRating, positionX, positionY);
+        graphics.drawString(text, positionX, positionY);
 
         FontRenderContext fontRenderContext = graphics.getFontRenderContext();
-        TextLayout textLayout = new TextLayout(imdbRating, font, fontRenderContext);
+        TextLayout textLayout = new TextLayout(text, font, fontRenderContext);
 
         Shape outline = textLayout.getOutline(null);
         AffineTransform transform = graphics.getTransform();
